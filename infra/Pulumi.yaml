@@ -1,0 +1,3 @@
+name: ktor-sample
+runtime: nodejs
+description: An example Ktor web server running on Cloud Run
