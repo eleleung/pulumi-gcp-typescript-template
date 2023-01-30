@@ -5,6 +5,9 @@ steps:
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/claimer-devops/ktor-hello-world']
+  # Set the correct project
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['config', 'set', 'project', 'dev-two']
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
