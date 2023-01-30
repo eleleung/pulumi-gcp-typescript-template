@@ -1,0 +1,16 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/claimer-devops/ktor-hello-world', '.']
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/claimer-devops/ktor-hello-world']
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: ['run', 'deploy', 'ktor-hello-world', '--image', 'gcr.io/claimer-devops/ktor-hello-world', '--region', 'europe-west2']
+images:
+  - gcr.io/claimer-devops/ktor-hello-world
+options:
+  pool:
+    name: 'projects/785020424916/locations/europe-west2/workerPools/pool-1'
