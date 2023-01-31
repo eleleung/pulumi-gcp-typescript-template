@@ -6,12 +6,12 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/claimer-devops/ktor-hello-world']
   # Set the correct project
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['config', 'set', 'project', 'claimer-dev-two']
+#  - name: 'gcr.io/cloud-builders/gcloud'
+#    args: ['config', 'set', 'project', 'claimer-dev-two']
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
-    args: ['run', 'deploy', 'ktor-hello-world', '--image', 'gcr.io/claimer-devops/ktor-hello-world', '--region', 'europe-west2']
+    args: ['run', 'deploy', 'ktor-hello-world', '--image', 'gcr.io/claimer-devops/ktor-hello-world', '--region', 'europe-west2', '--project', 'claimer-dev-two']
 images:
   - gcr.io/claimer-devops/ktor-hello-world
 options:
