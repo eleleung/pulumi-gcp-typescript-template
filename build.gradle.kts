@@ -7,6 +7,12 @@ plugins {
     id("io.ktor.plugin") version "2.2.2"
 }
 
+ktor {
+    fatJar {
+        archiveFileName.set("ktor-sample.jar")
+    }
+}
+
 group = "com.example"
 version = "0.0.1"
 application {
