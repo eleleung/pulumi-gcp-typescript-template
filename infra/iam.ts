@@ -1,26 +1,36 @@
 import * as gcp from '@pulumi/gcp';
 import * as pulumi from '@pulumi/pulumi';
 
-import { enableIamApi, tenantConfig } from './index';
+import { enableIamApi } from './apis';
+import { uploads } from './gcs';
+import { Config, tenantConfig } from './index';
 
-const cloudRunServiceAccount = new gcp.serviceaccount.Account(
-  `${tenantConfig.tenantId}-cloud-run`,
-  {
-    accountId: `${tenantConfig.tenantId}-cloud-run`,
-    description: `${tenantConfig.tenantId} cloud run service account`,
-    displayName: `${tenantConfig.tenantId} cloud run service account`,
-  }
-);
+export function createIamBindings(config: Config) {
+  const cloudRunServiceAccount = new gcp.serviceaccount.Account(`${config.tenantId}-cloud-run`, {
+    accountId: `${config.tenantId}-cloud-run`,
+    description: `${config.tenantId} cloud run service account`,
+    displayName: `${config.tenantId} cloud run service account`,
+  });
 
-const cloudRunServiceAccountEmail = pulumi.interpolate`serviceAccount:${cloudRunServiceAccount.email}`;
+  const cloudRunServiceAccountEmail = pulumi.interpolate`serviceAccount:${cloudRunServiceAccount.email}`;
 
-// cloud run needs to be associated with the cloudRunServiceAccount
-const cloudRunServiceAccountSqlClientIamBinding = new gcp.projects.IAMBinding(
-  `${tenantConfig.tenantId}-cloud-run-cloud-sql`,
-  {
-    project: tenantConfig.projectId,
-    members: [cloudRunServiceAccountEmail],
-    role: 'roles/cloudsql.client',
-  },
-  { parent: cloudRunServiceAccount, dependsOn: enableIamApi }
-);
+  // cloud run service needs to be associated with the cloudRunServiceAccount
+  const cloudRunSqlClientIamBinding = new gcp.projects.IAMBinding(
+    `${config.tenantId}-cloud-run-cloud-sql`,
+    {
+      project: config.projectId,
+      members: [cloudRunServiceAccountEmail],
+      role: 'roles/cloudsql.client',
+    },
+    { parent: cloudRunServiceAccount, dependsOn: enableIamApi }
+  );
+
+  const cloudRunGcsIamBinding = new gcp.storage.BucketIAMMember(
+    `${config.tenantId}-cloud-run-gcs`,
+    {
+      bucket: uploads.name,
+      role: 'roles/storage.admin',
+      member: cloudRunServiceAccountEmail,
+    }
+  );
+}

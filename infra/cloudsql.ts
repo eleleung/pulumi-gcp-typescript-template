@@ -1,7 +1,8 @@
 import * as gcp from '@pulumi/gcp';
 import * as pulumi from '@pulumi/pulumi';
 
-import { enableServiceNetworkingApi, enableSqlAdminApi, tenantConfig } from './index';
+import { enableServiceNetworkingApi, enableSqlAdminApi } from './apis';
+import { Config, tenantConfig } from './index';
 import { location } from './variables';
 
 /* 
@@ -25,6 +26,16 @@ const privateVpcConnection = new gcp.servicenetworking.Connection(
   }
 );
 
+// cloud run service needs to be associated with this vpc connector for db access
+export const vpcConnector = new gcp.vpcaccess.Connector(
+  'connector',
+  {
+    network: privateNetwork.id,
+    machineType: 'e2-standard-4',
+  },
+  { dependsOn: [enableServiceNetworkingApi] }
+);
+
 export const sqlInstance = new gcp.sql.DatabaseInstance(
   'sql-instance',
   {
@@ -42,16 +53,18 @@ export const sqlInstance = new gcp.sql.DatabaseInstance(
   { dependsOn: [privateVpcConnection, enableSqlAdminApi] }
 );
 
-export const database = new gcp.sql.Database(`${tenantConfig.tenantId}-database`, {
-  name: `${tenantConfig.tenantId}-database`,
-  instance: sqlInstance.name,
-});
+export function createDatabaseResources(config: Config) {
+  const database = new gcp.sql.Database(`${config.tenantId}-database`, {
+    name: `${tenantConfig.tenantId}-database`,
+    instance: sqlInstance.name,
+  });
 
-export const vpcConnector = new gcp.vpcaccess.Connector(
-  'connector',
-  {
-    network: privateNetwork.id,
-    machineType: 'e2-standard-4',
-  },
-  { dependsOn: [enableServiceNetworkingApi] }
-);
+  const databaseUser = new gcp.sql.User(
+    `${config.tenantId}-db-user`,
+    {
+      instance: sqlInstance.name,
+      password: 'password',
+    },
+    { dependsOn: [database] }
+  );
+}
