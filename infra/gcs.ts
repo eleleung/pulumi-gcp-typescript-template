@@ -1,6 +1,6 @@
 import * as gcp from '@pulumi/gcp';
 
-import { Config, tenantConfig } from '.';
+import { Config } from '.';
 
 export const uploads = (config: Config) =>
   new gcp.storage.Bucket(`${config.tenantId}-uploads`, {

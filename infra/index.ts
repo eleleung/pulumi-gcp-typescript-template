@@ -2,7 +2,7 @@ import { DatabaseInstance } from '@pulumi/gcp/sql';
 import * as pulumi from '@pulumi/pulumi';
 
 import { createDatabaseResources, sqlInstance } from './cloudsql';
-import { uploads as createUploads } from './gcs';
+import { uploads } from './gcs';
 import { createIamBindings } from './iam';
 
 export interface Config {
@@ -18,7 +18,7 @@ export const tenantConfig: Config = {
 
 function createTenant(tenantConfig: Config, cloudSqlInstanceRef: DatabaseInstance) {
   createDatabaseResources(tenantConfig);
-  createUploads(tenantConfig);
+  uploads(tenantConfig);
   createIamBindings(tenantConfig);
 }
 
