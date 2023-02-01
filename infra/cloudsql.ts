@@ -1,5 +1,4 @@
 import * as gcp from '@pulumi/gcp';
-import * as pulumi from '@pulumi/pulumi';
 
 import { enableServiceNetworkingApi, enableSqlAdminApi } from './apis';
 import { Config, tenantConfig } from './index';
@@ -55,7 +54,7 @@ export const sqlInstance = new gcp.sql.DatabaseInstance(
 
 export function createDatabaseResources(config: Config) {
   const database = new gcp.sql.Database(`${config.tenantId}-database`, {
-    name: `${tenantConfig.tenantId}-database`,
+    name: `${config.tenantId}-database`,
     instance: sqlInstance.name,
   });
 

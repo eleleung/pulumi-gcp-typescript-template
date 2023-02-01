@@ -3,7 +3,8 @@ import * as pulumi from '@pulumi/pulumi';
 
 import { enableIamApi } from './apis';
 import { uploads } from './gcs';
-import { Config, tenantConfig } from './index';
+import { Config } from './index';
+import { dbPassword } from './secrets';
 
 export function createIamBindings(config: Config) {
   const cloudRunServiceAccount = new gcp.serviceaccount.Account(`${config.tenantId}-cloud-run`, {
@@ -30,6 +31,15 @@ export function createIamBindings(config: Config) {
     {
       bucket: uploads.name,
       role: 'roles/storage.admin',
+      member: cloudRunServiceAccountEmail,
+    }
+  );
+
+  const cloudRunDbPasswordIamBinding = new gcp.secretmanager.SecretIamMember(
+    `${config.tenantId}-cloud-run-db-pwd`,
+    {
+      secretId: dbPassword(config).secretId,
+      role: 'roles/secretmanager.secretAccessor',
       member: cloudRunServiceAccountEmail,
     }
   );
