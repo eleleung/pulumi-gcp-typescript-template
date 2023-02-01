@@ -1,2 +1,5 @@
 config:
   gcp:project: claimer-dev-two
+  data:
+    gcp-project: claimer-dev-two
+    tenant-id: claimer
