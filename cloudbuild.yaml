@@ -13,20 +13,20 @@ steps:
       - 'SHORT_SHA=$SHORT_SHA'
     secretEnv: [ 'CACHE_PASS' ]
   # Deploy container image to Cloud Run
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: gcloud
-    args: ['run', 'deploy', 'ktor-hello-world', '--image', 'gcr.io/claimer-devops/ktor-hello-world', '--region', 'europe-west2', '--project', 'claimer-dev-two']
+#  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#    entrypoint: gcloud
+#    args: ['run', 'deploy', 'ktor-hello-world', '--image', 'gcr.io/claimer-devops/ktor-hello-world', '--region', 'europe-west2', '--project', 'claimer-dev-two']
   # Run pulumi up
-#  - name: 'gcr.io/cloud-builders/yarn'
-#    entrypoint: /bin/sh
-#    args:
-#      - '-c'
-#      - 'chmod +x *.sh && ./pulumi.sh'
-#    env:
-#      # We use substitution for an example. Your Pulumi access token is sensitive and as such should be encrypted.
-#      # See the Encrypted Variables section below on how to do that.
-#      - 'PULUMI_ACCESS_TOKEN=$_INSECURE_SUBSTITUTION_PULUMI_ACCESS_TOKEN'
-#      - 'BUILD_TYPE=$_BUILD_TYPE'
+  - name: 'gcr.io/cloud-builders/yarn'
+    entrypoint: /bin/sh
+    args:
+      - '-c'
+      - 'chmod +x *.sh && ./pulumi.sh'
+    env:
+      # We use substitution for an example. Your Pulumi access token is sensitive and as such should be encrypted.
+      # See the Encrypted Variables section below on how to do that.
+      - 'PULUMI_ACCESS_TOKEN=$_INSECURE_SUBSTITUTION_PULUMI_ACCESS_TOKEN'
+      - 'BUILD_TYPE=$_BUILD_TYPE'
 availableSecrets:
   secretManager:
     - versionName: 'projects/785020424916/secrets/gradle-cache-pass/versions/2'
