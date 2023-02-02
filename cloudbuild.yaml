@@ -27,8 +27,10 @@ steps:
 #      # See the Encrypted Variables section below on how to do that.
 #      - 'PULUMI_ACCESS_TOKEN=$_INSECURE_SUBSTITUTION_PULUMI_ACCESS_TOKEN'
 #      - 'BUILD_TYPE=$_BUILD_TYPE'
-images:
-  - gcr.io/claimer-devops/ktor-hello-world
+availableSecrets:
+  secretManager:
+    - versionName: 'projects/785020424916/secrets/gradle-cache-pass/versions/2'
+      env: 'CACHE_PASS'
 options:
   pool:
     name: 'projects/785020424916/locations/europe-west2/workerPools/pool-1'
