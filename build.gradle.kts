@@ -1,3 +1,5 @@
+import com.google.cloud.tools.jib.gradle.JibExtension
+
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -5,6 +7,7 @@ val logback_version: String by project
 plugins {
     kotlin("jvm") version "1.8.0"
     id("io.ktor.plugin") version "2.2.2"
+    id("com.google.cloud.tools.jib") version "3.3.1"
 }
 
 ktor {
@@ -32,4 +35,15 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+}
+
+configure<JibExtension> {
+    to {
+        val branch = System.getenv("BRANCH_NAME")
+        val sha = System.getenv("SHORT_SHA")
+        val tag = "$branch-$sha"
+        image = "gcr.io/claimer-devops/ktor-hello-world"
+        setTags(listOf(tag))
+    }
+    containerizingMode = "packaged"
 }

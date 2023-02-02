@@ -1,13 +1,17 @@
 steps:
-  # Build the container image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/claimer-devops/ktor-hello-world', '.']
-  # Push the container image to Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/claimer-devops/ktor-hello-world']
-  # Set the correct project
-#  - name: 'gcr.io/cloud-builders/gcloud'
-#    args: ['config', 'set', 'project', 'claimer-dev-two']
+  - id: "docker-builds"
+    name: "gcr.io/claimer-devops/cloud-build-builder:ada4137"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        gradle build jib
+    waitFor: [ "-" ]
+    env:
+      - 'CACHE_USER=$_CACHE_USER'
+      - 'BRANCH_NAME=$BRANCH_NAME'
+      - 'SHORT_SHA=$SHORT_SHA'
+    secretEnv: [ 'CACHE_PASS' ]
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
