@@ -8,6 +8,8 @@ set -e -x
 curl -L https://get.pulumi.com/ | bash
 export PATH=$PATH:$HOME/.pulumi/bin
 
+cd infra
+
 # Restore npm dependencies for our infra app.
 yarn install
 
