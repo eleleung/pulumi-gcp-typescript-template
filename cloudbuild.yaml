@@ -24,6 +24,8 @@ steps:
       - 'PULUMI_ACCESS_TOKEN=$_INSECURE_SUBSTITUTION_PULUMI_ACCESS_TOKEN'
       - 'BUILD_TYPE=$_BUILD_TYPE'
       - 'PULUMI_STACK=$_PULUMI_STACK'
+      - 'BRANCH_NAME=$BRANCH_NAME'
+      - 'SHORT_SHA=$SHORT_SHA'
 availableSecrets:
   secretManager:
     - versionName: 'projects/785020424916/secrets/gradle-cache-pass/versions/2'
