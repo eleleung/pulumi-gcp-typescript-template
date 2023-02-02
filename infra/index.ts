@@ -13,6 +13,7 @@ export interface Config {
 }
 const config = new pulumi.Config();
 const region = config.require('gcp-region');
+export const imageTag = config.require('tag');
 
 const sqlInstance = createCloudSqlInstance(region);
 
