@@ -27,6 +27,7 @@ steps:
       # See the Encrypted Variables section below on how to do that.
       - 'PULUMI_ACCESS_TOKEN=$_INSECURE_SUBSTITUTION_PULUMI_ACCESS_TOKEN'
       - 'BUILD_TYPE=$_BUILD_TYPE'
+      - 'PULUMI_STACK=$_PULUMI_STACK'
 availableSecrets:
   secretManager:
     - versionName: 'projects/785020424916/secrets/gradle-cache-pass/versions/2'
