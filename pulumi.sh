@@ -19,6 +19,7 @@ pulumi login
 # Select the appropriate stack.
 pulumi stack select $PULUMI_STACK
 
+echo "${BRANCH_NAME}-${SHORT_SHA}"
 pulumi config set tag "${BRANCH_NAME}-${SHORT_SHA}"
 
 case $BUILD_TYPE in
