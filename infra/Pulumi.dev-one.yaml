@@ -1,4 +1,4 @@
 config:
   gcp:project: claimer-dev-one
   gcp-project: claimer-dev-one
-  tenant-id: claimer
+  gcp-region: europe-west2

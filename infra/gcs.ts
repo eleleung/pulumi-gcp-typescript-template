@@ -4,7 +4,11 @@ import { Config } from '.';
 
 export const uploads = (config: Config) =>
   new gcp.storage.Bucket(`${config.tenantId}-uploads`, {
+    name: `${config.tenantId}-uploads`,
     forceDestroy: true,
     location: 'EU',
     publicAccessPrevention: 'enforced',
+    versioning: {
+      enabled: true,
+    },
   });

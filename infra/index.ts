@@ -1,25 +1,35 @@
 import { DatabaseInstance } from '@pulumi/gcp/sql';
 import * as pulumi from '@pulumi/pulumi';
 
-import { createDatabaseResources, sqlInstance } from './cloudsql';
+import { createCloudSqlInstance, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
 import { createIamBindings } from './iam';
+import { createDbSecret } from './secrets';
 
 export interface Config {
   projectId: string;
   tenantId: string;
+  region: string;
 }
 const config = new pulumi.Config();
+const region = config.require('gcp-region');
 
-export const tenantConfig: Config = {
-  projectId: config.require('gcp-project'),
-  tenantId: config.require('tenant-id'),
-};
+const sqlInstance = createCloudSqlInstance(region);
 
 function createTenant(tenantConfig: Config, cloudSqlInstanceRef: DatabaseInstance) {
-  createDatabaseResources(tenantConfig);
-  uploads(tenantConfig);
-  createIamBindings(tenantConfig);
+  const dbPassword = createDbSecret(tenantConfig);
+  const uploadBucket = uploads(tenantConfig);
+  createDatabaseResources(tenantConfig, cloudSqlInstanceRef, dbPassword);
+  createIamBindings(tenantConfig, dbPassword, uploadBucket);
 }
 
-createTenant(tenantConfig, sqlInstance);
+createTenant(
+  {
+    projectId: config.require('gcp-project'),
+    tenantId: 'claimer',
+    region: region,
+  },
+  sqlInstance
+);
+
+export const sqlInstanceId = sqlInstance.id;
