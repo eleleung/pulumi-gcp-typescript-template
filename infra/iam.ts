@@ -1,10 +1,17 @@
 import * as gcp from '@pulumi/gcp';
+import { Topic, TopicIAMMember } from '@pulumi/gcp/pubsub';
 import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
+import { Output } from '@pulumi/pulumi';
 
 import { enableIamApi } from './apis';
+import { uploads } from './gcs';
 import { Config } from './index';
+import { gcpTopicMap } from './pubsub/topics';
 import { DatabasePassword } from './secrets';
+//import { dbPassword } from './secrets';
+import { googleDevProject } from './variables';
+import { pubsubRoles } from './variables';
 
 export function createIamBindings(
   config: Config,
@@ -46,5 +53,33 @@ export function createIamBindings(
       role: 'roles/secretmanager.secretAccessor',
       member: cloudRunServiceAccountEmail,
     }
+  );
+
+  return cloudRunServiceAccountEmail;
+
+  // const bindings = Array.from(gcpTopicMap).map(([topicName, topic]) => {
+  //   return new gcp.pubsub.TopicIAMMember(topicName.concat(memberBinding), {
+  //     project: googleDevProject,
+  //     topic: topic.name,
+  //     role: pubsubRoles.publisher,
+  //     member: cloudRunServiceAccountEmail,
+  //   });
+  // });
+
+  //const topicNewArray = Array.from(bindings);
+}
+
+const memberBinding = '-iam-member-binding';
+const memberPrefix = 'group:';
+
+export function createIamTopicBindings(serviceAccount: Output<string>) {
+  gcpTopicMap.forEach(
+    (topic, name) =>
+      new gcp.pubsub.TopicIAMMember(name.concat(memberBinding), {
+        project: googleDevProject,
+        topic: topic.name,
+        role: pubsubRoles.publisher,
+        member: serviceAccount,
+      })
   );
 }

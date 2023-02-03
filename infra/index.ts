@@ -6,7 +6,8 @@ import * as pulumi from '@pulumi/pulumi';
 import { deployCloudRun } from './cloudrun';
 import { createCloudSqlInstance, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
-import { createIamBindings } from './iam';
+import { createIamBindings, createIamTopicBindings } from './iam';
+import { createTopics } from './pubsub/topics';
 import { createDbSecret } from './secrets';
 
 export interface Config {
@@ -22,7 +23,9 @@ export interface TenantResources {
 }
 
 const config = new pulumi.Config();
-const region = config.require('gcp-region');
+const gcpConfig = new pulumi.Config('gcp');
+const projectId = gcpConfig.require('project');
+const region = gcpConfig.require('region');
 export const imageTag = config.get('tag') || 'latest';
 
 const sqlInstance = createCloudSqlInstance(region);
@@ -34,7 +37,10 @@ function createTenant(
   const dbPassword = createDbSecret(tenantConfig);
   const uploadBucket = uploads(tenantConfig);
   createDatabaseResources(tenantConfig, cloudSqlInstanceRef, dbPassword);
-  createIamBindings(tenantConfig, dbPassword, uploadBucket);
+  const cloudRunServiceAccount = createIamBindings(tenantConfig, dbPassword, uploadBucket);
+  createTopics(tenantConfig);
+  createIamTopicBindings(cloudRunServiceAccount);
+
   const cloudRunService = deployCloudRun(tenantConfig, imageTag, cloudSqlInstanceRef);
 
   return {
@@ -46,7 +52,7 @@ function createTenant(
 
 const claimer = createTenant(
   {
-    projectId: config.require('gcp-project'),
+    projectId: projectId,
     tenantId: 'claimer',
     region: region,
   },
