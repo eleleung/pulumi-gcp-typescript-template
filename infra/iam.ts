@@ -40,7 +40,10 @@ export function createIamBindings(
     `${config.tenantId}-cloud-run-service-account-user-iam-binding`,
     {
       project: config.projectId,
-      members: [cloudRunServiceAccountEmail],
+      members: [
+        cloudRunServiceAccountEmail,
+        'serviceAccount:785020424916@cloudbuild.gserviceaccount.com',
+      ],
       role: 'roles/iam.serviceAccountUser',
     },
     {
