@@ -1,11 +1,9 @@
 import * as gcp from '@pulumi/gcp';
-import { Topic, TopicIAMMember } from '@pulumi/gcp/pubsub';
 import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
 import { Output } from '@pulumi/pulumi';
 
 import { enableIamApi } from './apis';
-import { uploads } from './gcs';
 import { Config } from './index';
 import { gcpTopicMap } from './pubsub/topics';
 import { DatabasePassword } from './secrets';

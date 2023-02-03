@@ -7,6 +7,7 @@ import { deployCloudRun } from './cloudrun';
 import { createCloudSqlInstance, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
 import { createIamBindings, createIamTopicBindings } from './iam';
+import { createSubscriptions } from './pubsub/subscriptions';
 import { createTopics } from './pubsub/topics';
 import { createDbSecret } from './secrets';
 
@@ -40,6 +41,7 @@ function createTenant(
   const cloudRunServiceAccount = createIamBindings(tenantConfig, dbPassword, uploadBucket);
   createTopics(tenantConfig);
   createIamTopicBindings(cloudRunServiceAccount, tenantConfig);
+  createSubscriptions(tenantConfig);
 
   const cloudRunService = deployCloudRun(tenantConfig, imageTag, cloudSqlInstanceRef);
 
