@@ -22,6 +22,18 @@ export function createIamBindings(
 
   const cloudRunServiceAccountEmail = pulumi.interpolate`serviceAccount:${cloudRunServiceAccount.email}`;
 
+  new gcp.projects.IAMBinding(
+    `${config.tenantId}-cloud-run-admin-iam-binding`,
+    {
+      project: config.projectId,
+      members: [cloudRunServiceAccountEmail],
+      role: 'roles/run.admin',
+    },
+    {
+      parent: cloudRunServiceAccount,
+    }
+  );
+
   // cloud run service needs to be associated with the cloudRunServiceAccount
   new gcp.projects.IAMBinding(
     `${config.tenantId}-cloud-run-cloud-sql`,
