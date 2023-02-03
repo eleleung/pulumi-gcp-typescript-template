@@ -5,7 +5,7 @@ import * as pulumi from '@pulumi/pulumi';
 import { enableIamApi } from './apis';
 import { Config } from './index';
 import { DatabasePassword } from './secrets';
-import { pubsubRoles } from './variables';
+import { devOpsCloudBuildServiceAccount, pubsubRoles } from './variables';
 
 export function createIamBindings(
   config: Config,
@@ -25,10 +25,7 @@ export function createIamBindings(
     `${config.tenantId}-cloud-run-admin-iam-binding`,
     {
       project: config.projectId,
-      members: [
-        cloudRunServiceAccountEmail,
-        'serviceAccount:785020424916@cloudbuild.gserviceaccount.com',
-      ],
+      members: [cloudRunServiceAccountEmail, devOpsCloudBuildServiceAccount],
       role: 'roles/run.admin',
     },
     {
@@ -40,10 +37,7 @@ export function createIamBindings(
     `${config.tenantId}-cloud-run-service-account-user-iam-binding`,
     {
       project: config.projectId,
-      members: [
-        cloudRunServiceAccountEmail,
-        'serviceAccount:785020424916@cloudbuild.gserviceaccount.com',
-      ],
+      members: [cloudRunServiceAccountEmail, devOpsCloudBuildServiceAccount],
       role: 'roles/iam.serviceAccountUser',
     },
     {
