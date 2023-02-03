@@ -34,6 +34,18 @@ export function createIamBindings(
     }
   );
 
+  new gcp.projects.IAMBinding(
+    `${config.tenantId}-cloud-run-service-account-user-iam-binding`,
+    {
+      project: config.projectId,
+      members: [cloudRunServiceAccountEmail],
+      role: 'roles/iam.serviceAccountUser',
+    },
+    {
+      parent: cloudRunServiceAccount,
+    }
+  );
+
   // cloud run service needs to be associated with the cloudRunServiceAccount
   new gcp.projects.IAMBinding(
     `${config.tenantId}-cloud-run-cloud-sql`,
