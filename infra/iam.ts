@@ -84,5 +84,5 @@ export function createIamBindings(
       })
   );
 
-  return cloudRunServiceAccountEmail;
+  return cloudRunServiceAccount.email;
 }

@@ -2,6 +2,7 @@ import { Service } from '@pulumi/gcp/cloudrun';
 import { DatabaseInstance } from '@pulumi/gcp/sql';
 import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
+import { Output } from '@pulumi/pulumi';
 
 import { deployCloudRun } from './cloudrun';
 import { createCloudSqlInstance, createDatabaseResources } from './cloudsql';
@@ -18,6 +19,7 @@ export interface Config {
 
 export interface TenantResources {
   cloudRunService: Service;
+  cloudRunServiceAccount: Output<string>;
   sqlInstance: DatabaseInstance;
   uploadBucket: Bucket;
 }
@@ -50,6 +52,7 @@ function createTenant(
 
   return {
     cloudRunService,
+    cloudRunServiceAccount,
     sqlInstance,
     uploadBucket,
   };
@@ -65,5 +68,6 @@ const claimer = createTenant(
 );
 
 export const claimerCloudRunServiceId = claimer.cloudRunService.id;
+export const claimerCloudRunServiceAccountEmail = claimer.cloudRunServiceAccount;
 export const claimerSqlInstanceId = claimer.sqlInstance.id;
 export const claimerUploadBucketId = claimer.uploadBucket.id;
