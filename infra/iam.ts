@@ -1,7 +1,6 @@
 import * as gcp from '@pulumi/gcp';
 import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
-import { Output } from '@pulumi/pulumi';
 
 import { enableIamApi } from './apis';
 import { Config } from './index';
