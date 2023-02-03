@@ -1,4 +1,3 @@
 config:
-  gcp:
-    project: claimer-dev-two
-    region: europe-west2
+  gcp:project: claimer-dev-two
+  gcp:region: europe-west2

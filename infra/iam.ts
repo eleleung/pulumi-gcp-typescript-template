@@ -69,7 +69,6 @@ export function createIamBindings(
 }
 
 const memberBinding = '-iam-member-binding';
-const memberPrefix = 'group:';
 
 export function createIamTopicBindings(serviceAccount: Output<string>, config: Config) {
   gcpTopicMap.forEach(

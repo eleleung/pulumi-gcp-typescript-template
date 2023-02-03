@@ -39,7 +39,7 @@ function createTenant(
   createDatabaseResources(tenantConfig, cloudSqlInstanceRef, dbPassword);
   const cloudRunServiceAccount = createIamBindings(tenantConfig, dbPassword, uploadBucket);
   createTopics(tenantConfig);
-  createIamTopicBindings(cloudRunServiceAccount);
+  createIamTopicBindings(cloudRunServiceAccount, tenantConfig);
 
   const cloudRunService = deployCloudRun(tenantConfig, imageTag, cloudSqlInstanceRef);
 
