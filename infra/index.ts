@@ -6,7 +6,7 @@ import * as pulumi from '@pulumi/pulumi';
 import { deployCloudRun } from './cloudrun';
 import { createCloudSqlInstance, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
-import { createIamBindings, createIamTopicBindings } from './iam';
+import { createIamBindings } from './iam';
 import { createTopics } from './pubsub/topics';
 import { createDbSecret } from './secrets';
 
@@ -22,10 +22,11 @@ export interface TenantResources {
   uploadBucket: Bucket;
 }
 
-const config = new pulumi.Config();
 const gcpConfig = new pulumi.Config('gcp');
 const projectId = gcpConfig.require('project');
 const region = gcpConfig.require('region');
+
+const config = new pulumi.Config();
 export const imageTag = config.get('tag') || 'latest';
 
 const sqlInstance = createCloudSqlInstance(region);
@@ -36,12 +37,16 @@ function createTenant(
 ): TenantResources {
   const dbPassword = createDbSecret(tenantConfig);
   const uploadBucket = uploads(tenantConfig);
+  const topics = createTopics(tenantConfig);
+  const cloudRunServiceAccount = createIamBindings(tenantConfig, dbPassword, uploadBucket, topics);
   createDatabaseResources(tenantConfig, cloudSqlInstanceRef, dbPassword);
-  const cloudRunServiceAccount = createIamBindings(tenantConfig, dbPassword, uploadBucket);
-  createTopics(tenantConfig);
-  createIamTopicBindings(cloudRunServiceAccount, tenantConfig);
 
-  const cloudRunService = deployCloudRun(tenantConfig, imageTag, cloudSqlInstanceRef);
+  const cloudRunService = deployCloudRun(
+    tenantConfig,
+    cloudRunServiceAccount,
+    imageTag,
+    cloudSqlInstanceRef
+  );
 
   return {
     cloudRunService,

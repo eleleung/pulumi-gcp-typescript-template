@@ -1,21 +1,18 @@
 import * as gcp from '@pulumi/gcp';
-import { Topic, TopicIAMMember } from '@pulumi/gcp/pubsub';
 import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
 import { Output } from '@pulumi/pulumi';
 
 import { enableIamApi } from './apis';
-import { uploads } from './gcs';
 import { Config } from './index';
-import { gcpTopicMap } from './pubsub/topics';
 import { DatabasePassword } from './secrets';
-//import { dbPassword } from './secrets';
 import { pubsubRoles } from './variables';
 
 export function createIamBindings(
   config: Config,
   dbpassword: DatabasePassword,
-  uploadBucket: Bucket
+  uploadBucket: Bucket,
+  gcpTopicMap: Map<string, gcp.pubsub.Topic>
 ) {
   const cloudRunServiceAccount = new gcp.serviceaccount.Account(`${config.tenantId}-cloud-run`, {
     accountId: `${config.tenantId}-cloud-run`,
@@ -26,7 +23,7 @@ export function createIamBindings(
   const cloudRunServiceAccountEmail = pulumi.interpolate`serviceAccount:${cloudRunServiceAccount.email}`;
 
   // cloud run service needs to be associated with the cloudRunServiceAccount
-  const cloudRunSqlClientIamBinding = new gcp.projects.IAMBinding(
+  new gcp.projects.IAMBinding(
     `${config.tenantId}-cloud-run-cloud-sql`,
     {
       project: config.projectId,
@@ -36,48 +33,32 @@ export function createIamBindings(
     { parent: cloudRunServiceAccount, dependsOn: enableIamApi }
   );
 
-  const cloudRunGcsIamBinding = new gcp.storage.BucketIAMMember(
+  new gcp.storage.BucketIAMMember(
     `${config.tenantId}-cloud-run-gcs`,
     {
       bucket: uploadBucket.name,
       role: 'roles/storage.admin',
       member: cloudRunServiceAccountEmail,
-    }
+    },
+    { parent: uploadBucket }
   );
 
-  const cloudRunDbPasswordIamBinding = new gcp.secretmanager.SecretIamMember(
-    `${config.tenantId}-cloud-run-db-pwd`,
-    {
-      secretId: dbpassword.secret.secretId,
-      role: 'roles/secretmanager.secretAccessor',
-      member: cloudRunServiceAccountEmail,
-    }
-  );
+  new gcp.secretmanager.SecretIamMember(`${config.tenantId}-cloud-run-db-pwd`, {
+    secretId: dbpassword.secret.secretId,
+    role: 'roles/secretmanager.secretAccessor',
+    member: cloudRunServiceAccountEmail,
+  });
 
-  return cloudRunServiceAccountEmail;
-
-  // const bindings = Array.from(gcpTopicMap).map(([topicName, topic]) => {
-  //   return new gcp.pubsub.TopicIAMMember(topicName.concat(memberBinding), {
-  //     project: googleDevProject,
-  //     topic: topic.name,
-  //     role: pubsubRoles.publisher,
-  //     member: cloudRunServiceAccountEmail,
-  //   });
-  // });
-
-  //const topicNewArray = Array.from(bindings);
-}
-
-const memberBinding = '-iam-member-binding';
-
-export function createIamTopicBindings(serviceAccount: Output<string>, config: Config) {
-  gcpTopicMap.forEach(
-    (topic, name) =>
-      new gcp.pubsub.TopicIAMMember(name.concat(memberBinding), {
+  const memberBinding = '-iam-member-binding';
+  [...gcpTopicMap].map(
+    ([topicName, topic]) =>
+      new gcp.pubsub.TopicIAMMember(topicName.concat(memberBinding), {
         project: config.projectId,
         topic: topic.name,
         role: pubsubRoles.publisher,
-        member: serviceAccount,
+        member: cloudRunServiceAccountEmail,
       })
   );
+
+  return cloudRunServiceAccountEmail;
 }

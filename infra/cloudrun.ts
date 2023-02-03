@@ -1,11 +1,13 @@
 import * as gcp from '@pulumi/gcp';
 import { Service } from '@pulumi/gcp/cloudrun';
 import { DatabaseInstance } from '@pulumi/gcp/sql';
+import { Output } from '@pulumi/pulumi';
 
 import { Config } from '.';
 
 export function deployCloudRun(
   config: Config,
+  cloudRunServiceAccount: Output<string>,
   imageTag: string,
   dbInstance: DatabaseInstance
 ): Service {
@@ -18,6 +20,7 @@ export function deployCloudRun(
             image: `gcr.io/claimer-devops/ktor-hello-world:${imageTag}`,
           },
         ],
+        serviceAccountName: cloudRunServiceAccount,
       },
       metadata: {
         annotations: {

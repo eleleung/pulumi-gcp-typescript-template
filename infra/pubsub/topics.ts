@@ -20,7 +20,7 @@ const configuration: TopicConfiguration = {
 };
 
 export function createTopics(tenantConfig: Config) {
-  createGCPTopic(createTopicDefinition(tenantConfig));
+  return createGCPTopic(createTopicDefinition(tenantConfig));
 }
 
 const createTopicDefinition = (tenantConfig: Config): Array<TopicDefinition> => {
@@ -40,6 +40,8 @@ const createTopicDefinition = (tenantConfig: Config): Array<TopicDefinition> => 
 };
 
 const createGCPTopic = (topicDefinitions: Array<TopicDefinition>) => {
+  const gcpTopicMap = new Map<string, gcp.pubsub.Topic>();
+
   topicDefinitions.forEach(topic => {
     gcpTopicMap.set(
       topic.name,
@@ -49,7 +51,6 @@ const createGCPTopic = (topicDefinitions: Array<TopicDefinition>) => {
       })
     );
   });
-};
 
-//export for use when creating IAM
-export const gcpTopicMap = new Map<string, gcp.pubsub.Topic>();
+  return gcpTopicMap;
+};
