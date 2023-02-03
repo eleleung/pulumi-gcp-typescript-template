@@ -24,9 +24,9 @@ pulumi config set tag "${BRANCH_NAME}-${SHORT_SHA}"
 
 case $BUILD_TYPE in
   PullRequest)
-      pulumi preview
+      pulumi preview --refresh
     ;;
   *)
-      pulumi up --yes
+      pulumi up --refresh --yes
     ;;
 esac
