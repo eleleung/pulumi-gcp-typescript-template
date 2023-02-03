@@ -10,7 +10,6 @@ import { Config } from './index';
 import { gcpTopicMap } from './pubsub/topics';
 import { DatabasePassword } from './secrets';
 //import { dbPassword } from './secrets';
-import { googleDevProject } from './variables';
 import { pubsubRoles } from './variables';
 
 export function createIamBindings(
@@ -72,11 +71,11 @@ export function createIamBindings(
 const memberBinding = '-iam-member-binding';
 const memberPrefix = 'group:';
 
-export function createIamTopicBindings(serviceAccount: Output<string>) {
+export function createIamTopicBindings(serviceAccount: Output<string>, config: Config) {
   gcpTopicMap.forEach(
     (topic, name) =>
       new gcp.pubsub.TopicIAMMember(name.concat(memberBinding), {
-        project: googleDevProject,
+        project: config.projectId,
         topic: topic.name,
         role: pubsubRoles.publisher,
         member: serviceAccount,
