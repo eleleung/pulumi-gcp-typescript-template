@@ -1,15 +1,15 @@
 import * as gcp from '@pulumi/gcp';
 import { Service } from '@pulumi/gcp/cloudrun';
-import { DatabaseInstance } from '@pulumi/gcp/sql';
 import { Output } from '@pulumi/pulumi';
 
 import { Config } from '.';
+import { CloudSqlResources } from './cloudsql';
 
 export function deployCloudRun(
   config: Config,
   cloudRunServiceAccount: Output<string>,
   imageTag: string,
-  dbInstance: DatabaseInstance
+  cloudSqlResources: CloudSqlResources
 ): Service {
   const service = new gcp.cloudrun.Service(`${config.tenantId}-cloud-run-service`, {
     location: config.region,
@@ -25,7 +25,8 @@ export function deployCloudRun(
       metadata: {
         annotations: {
           'autoscaling.knative.dev/maxScale': '5',
-          'run.googleapis.com/cloudsql-instances': dbInstance.connectionName,
+          'run.googleapis.com/vpc-access-connector': cloudSqlResources.vpcConnector.name,
+          'run.googleapis.com/cloudsql-instances': cloudSqlResources.sqlInstance.connectionName,
         },
       },
     },
