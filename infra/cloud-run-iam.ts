@@ -5,7 +5,6 @@ import * as pulumi from '@pulumi/pulumi';
 import { enableIamApi } from './apis';
 import { Config } from './index';
 import { DatabasePassword } from './secrets';
-import { devOpsCloudBuildServiceAccount } from './variables';
 
 export function createIamBindings(
   config: Config,

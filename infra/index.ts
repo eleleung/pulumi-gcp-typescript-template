@@ -63,7 +63,7 @@ function createTenant(tenantConfig: Config, cloudSqlResources: CloudSqlResources
 }
 
 // Create IAM
-addProjectServiceAgentRolesToDevops(devopsProjectNumber, devopsProjectId);
+// addProjectServiceAgentRolesToDevops(devopsProjectNumber, devopsProjectId);
 
 // Create resources
 const cloudSqlResources = createCloudSqlResources(region);
