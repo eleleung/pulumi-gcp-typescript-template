@@ -1,14 +1,20 @@
 import * as gcp from '@pulumi/gcp';
 import { DatabaseInstance } from '@pulumi/gcp/sql';
+import { Connector } from '@pulumi/gcp/vpcaccess';
 
 import { enableServiceNetworkingApi, enableSqlAdminApi } from './apis';
 import { Config } from './index';
 import { DatabasePassword } from './secrets';
 
+export interface CloudSqlResources {
+  sqlInstance: DatabaseInstance;
+  vpcConnector: Connector;
+}
+
 /* 
   The cloud SQL instance should be shared across the tenants within a project, but each tenant will have a separate database
 */
-export function createCloudSqlInstance(region: string): DatabaseInstance {
+export function createCloudSqlResources(region: string): CloudSqlResources {
   const privateNetwork = new gcp.compute.Network('network', {});
 
   const privateIpAddress = new gcp.compute.GlobalAddress('db-instance-private-ip-address', {
@@ -39,22 +45,25 @@ export function createCloudSqlInstance(region: string): DatabaseInstance {
     { dependsOn: [enableServiceNetworkingApi] }
   );
 
-  return new gcp.sql.DatabaseInstance(
-    'sql-instance',
-    {
-      region: region,
-      databaseVersion: 'POSTGRES_14',
-      settings: {
-        tier: 'db-f1-micro',
-        ipConfiguration: {
-          ipv4Enabled: false,
-          privateNetwork: privateNetwork.id,
+  return {
+    sqlInstance: new gcp.sql.DatabaseInstance(
+      'sql-instance',
+      {
+        region: region,
+        databaseVersion: 'POSTGRES_14',
+        settings: {
+          tier: 'db-f1-micro',
+          ipConfiguration: {
+            ipv4Enabled: false,
+            privateNetwork: privateNetwork.id,
+          },
         },
+        deletionProtection: false,
       },
-      deletionProtection: false,
-    },
-    { dependsOn: [privateVpcConnection, enableSqlAdminApi] }
-  );
+      { dependsOn: [privateVpcConnection, enableSqlAdminApi] }
+    ),
+    vpcConnector,
+  };
 }
 
 export function createDatabaseResources(

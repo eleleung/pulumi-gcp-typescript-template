@@ -1,12 +1,11 @@
 import * as gcp from '@pulumi/gcp';
 import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
-import { Output } from '@pulumi/pulumi';
 
 import { enableIamApi } from './apis';
 import { Config } from './index';
 import { DatabasePassword } from './secrets';
-import { pubsubRoles } from './variables';
+import { devOpsCloudBuildServiceAccount, pubsubRoles } from './variables';
 
 export function createIamBindings(
   config: Config,
@@ -26,7 +25,7 @@ export function createIamBindings(
     `${config.tenantId}-cloud-run-admin-iam-binding`,
     {
       project: config.projectId,
-      members: [cloudRunServiceAccountEmail],
+      members: [cloudRunServiceAccountEmail, devOpsCloudBuildServiceAccount],
       role: 'roles/run.admin',
     },
     {
@@ -38,7 +37,7 @@ export function createIamBindings(
     `${config.tenantId}-cloud-run-service-account-user-iam-binding`,
     {
       project: config.projectId,
-      members: [cloudRunServiceAccountEmail],
+      members: [cloudRunServiceAccountEmail, devOpsCloudBuildServiceAccount],
       role: 'roles/iam.serviceAccountUser',
     },
     {
@@ -84,5 +83,5 @@ export function createIamBindings(
       })
   );
 
-  return cloudRunServiceAccountEmail;
+  return cloudRunServiceAccount.email;
 }

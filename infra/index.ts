@@ -1,10 +1,10 @@
 import { Service } from '@pulumi/gcp/cloudrun';
-import { DatabaseInstance } from '@pulumi/gcp/sql';
 import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
+import { Output } from '@pulumi/pulumi';
 
 import { deployCloudRun } from './cloudrun';
-import { createCloudSqlInstance, createDatabaseResources } from './cloudsql';
+import { CloudSqlResources, createCloudSqlResources, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
 import { createIamBindings } from './iam';
 import { createSubscriptions } from './pubsub/subscriptions';
@@ -19,7 +19,8 @@ export interface Config {
 
 export interface TenantResources {
   cloudRunService: Service;
-  sqlInstance: DatabaseInstance;
+  cloudRunServiceAccount: Output<string>;
+  cloudSqlResources: CloudSqlResources;
   uploadBucket: Bucket;
 }
 
@@ -30,17 +31,14 @@ const region = gcpConfig.require('region');
 const config = new pulumi.Config();
 export const imageTag = config.get('tag') || 'latest';
 
-const sqlInstance = createCloudSqlInstance(region);
+const cloudSqlResources = createCloudSqlResources(region);
 
-function createTenant(
-  tenantConfig: Config,
-  cloudSqlInstanceRef: DatabaseInstance
-): TenantResources {
+function createTenant(tenantConfig: Config, cloudSqlResources: CloudSqlResources): TenantResources {
   const dbPassword = createDbSecret(tenantConfig);
   const uploadBucket = uploads(tenantConfig);
   const topics = createTopics(tenantConfig);
   const cloudRunServiceAccount = createIamBindings(tenantConfig, dbPassword, uploadBucket, topics);
-  createDatabaseResources(tenantConfig, cloudSqlInstanceRef, dbPassword);
+  createDatabaseResources(tenantConfig, cloudSqlResources.sqlInstance, dbPassword);
   createTopics(tenantConfig);
   createSubscriptions(tenantConfig, topics);
 
@@ -48,12 +46,13 @@ function createTenant(
     tenantConfig,
     cloudRunServiceAccount,
     imageTag,
-    cloudSqlInstanceRef
+    cloudSqlResources
   );
 
   return {
     cloudRunService,
-    sqlInstance,
+    cloudRunServiceAccount,
+    cloudSqlResources,
     uploadBucket,
   };
 }
@@ -64,9 +63,10 @@ const claimer = createTenant(
     tenantId: 'claimer',
     region: region,
   },
-  sqlInstance
+  cloudSqlResources
 );
 
 export const claimerCloudRunServiceId = claimer.cloudRunService.id;
-export const claimerSqlInstanceId = claimer.sqlInstance.id;
+export const claimerCloudRunServiceAccountEmail = claimer.cloudRunServiceAccount;
+export const claimerSqlInstanceId = claimer.cloudSqlResources.sqlInstance.id;
 export const claimerUploadBucketId = claimer.uploadBucket.id;

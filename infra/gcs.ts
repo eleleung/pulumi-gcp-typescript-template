@@ -1,5 +1,4 @@
 import * as gcp from '@pulumi/gcp';
-import * as random from '@pulumi/random';
 
 import { Config } from '.';
 
