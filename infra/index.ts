@@ -7,7 +7,7 @@ import { createIamBindings } from './cloud-run-iam';
 import { deployCloudRun } from './cloudrun';
 import { CloudSqlResources, createCloudSqlResources, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
-import { addProjectServiceAgentRolesToDevops } from './iam';
+import { addProjectComputeServiceAccountRoles } from './iam';
 import { createSubscriptions } from './pubsub/subscriptions';
 import { createTopics } from './pubsub/topics';
 import { createDbSecret } from './secrets';
@@ -63,7 +63,7 @@ function createTenant(tenantConfig: Config, cloudSqlResources: CloudSqlResources
 }
 
 // Create IAM
-// addProjectServiceAgentRolesToDevops(devopsProjectNumber, devopsProjectId);
+addProjectComputeServiceAccountRoles(devopsProjectNumber, devopsProjectId);
 
 // Create resources
 const cloudSqlResources = createCloudSqlResources(region);

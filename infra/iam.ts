@@ -1,11 +1,17 @@
 import * as gcp from '@pulumi/gcp';
 
-export function addProjectServiceAgentRolesToDevops(projectNumber: string, projectId: string) {
-  const projectServiceAgentAccount = `serviceAccount:${projectNumber}@serverless-robot-prod.iam.gserviceaccount.com`;
+export function addProjectComputeServiceAccountRoles(projectNumber: string, projectId: string) {
+  const projectComputeAccount = `serviceAccount:${projectNumber}-compute@developer.gserviceaccount.com`;
 
-  new gcp.projects.IAMMember(`${projectNumber}-service-agent-storage-viewer-role`, {
+  new gcp.projects.IAMMember(`${projectNumber}-compute-service-account-artifact-registry-role`, {
     project: projectId,
-    member: projectServiceAgentAccount,
-    role: 'roles/storage.objectViewer',
+    member: projectComputeAccount,
+    role: 'roles/artifactregistry.reader',
+  });
+
+  new gcp.projects.IAMMember(`${projectNumber}-compute-service-account-container-registry-role`, {
+    project: projectId,
+    member: projectComputeAccount,
+    role: 'roles/containerregistry.ServiceAgent',
   });
 }
