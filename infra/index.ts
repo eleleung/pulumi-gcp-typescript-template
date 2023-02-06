@@ -26,7 +26,7 @@ export interface TenantResources {
 
 const gcpConfig = new pulumi.Config('gcp');
 const projectId = gcpConfig.require('project');
-const region = gcpConfig.require('region');
+const region: string = gcpConfig.require('region');
 
 const config = new pulumi.Config();
 export const imageTag = config.get('tag') || 'latest';
@@ -37,10 +37,15 @@ function createTenant(tenantConfig: Config, cloudSqlResources: CloudSqlResources
   const dbPassword = createDbSecret(tenantConfig);
   const uploadBucket = uploads(tenantConfig);
   const topics = createTopics(tenantConfig);
-  const cloudRunServiceAccount = createIamBindings(tenantConfig, dbPassword, uploadBucket, topics);
+  const subscriptions = createSubscriptions(tenantConfig, topics);
+  const cloudRunServiceAccount = createIamBindings(
+    tenantConfig,
+    dbPassword,
+    uploadBucket,
+    topics,
+    subscriptions
+  );
   createDatabaseResources(tenantConfig, cloudSqlResources.sqlInstance, dbPassword);
-  createTopics(tenantConfig);
-  createSubscriptions(tenantConfig, topics);
 
   const cloudRunService = deployCloudRun(
     tenantConfig,

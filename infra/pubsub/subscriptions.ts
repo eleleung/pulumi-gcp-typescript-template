@@ -2,14 +2,14 @@ import * as gcp from '@pulumi/gcp';
 import * as pulumi from '@pulumi/pulumi';
 
 import { Config } from '..';
-import { topicAppender, topics } from './topics';
+import { topics } from './topics';
 
 interface subscriptions {
   names: string[];
 }
 
 const topic1Subscriptions: subscriptions = {
-  names: ['subcription-1', 'subscription-2'],
+  names: ['subscription-1', 'subscription-2'],
 };
 
 const topic2Subscriptions: subscriptions = {
@@ -25,17 +25,16 @@ export function createSubscriptions(
   tenantConfig: Config,
   gcpTopicMap: Map<string, gcp.pubsub.Topic>
 ) {
+  const subscriptionNamesMap = new Map<string, gcp.pubsub.Subscription>();
   subscriptionsMap.forEach((subscriptions, topic) => {
-    const selectedTopic = gcpTopicMap.get(
-      tenantConfig.tenantId.concat(topicAppender(topics.firstTopic))
-    );
+    const selectedTopic = gcpTopicMap.get(`${tenantConfig.tenantId}-${topic}`);
     if (typeof selectedTopic === 'undefined') {
       console.log('GCP topic is not defined correctly');
     } else {
       subscriptions.names.forEach(subscription => {
-        new gcp.pubsub.Subscription(
-          tenantConfig.tenantId.concat('-').concat(topic.concat('-').concat(subscription)),
-          {
+        subscriptionNamesMap.set(
+          subscription,
+          new gcp.pubsub.Subscription(`${tenantConfig.tenantId}-${topic}-${subscription}`, {
             topic: selectedTopic.name,
             enableMessageOrdering: true,
             ackDeadlineSeconds: 20,
@@ -49,11 +48,11 @@ export function createSubscriptions(
                 'x-goog-version': 'v1',
               },
             },
-          }
+          })
         );
       });
     }
   });
 
-  const allSubscriptions = Array.from(subscriptionsMap.values()).flatMap(({ names }) => names);
+  return subscriptionNamesMap;
 }

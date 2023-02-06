@@ -5,13 +5,14 @@ import * as pulumi from '@pulumi/pulumi';
 import { enableIamApi } from './apis';
 import { Config } from './index';
 import { DatabasePassword } from './secrets';
-import { devOpsCloudBuildServiceAccount, pubsubRoles } from './variables';
+import { devOpsCloudBuildServiceAccount } from './variables';
 
 export function createIamBindings(
   config: Config,
   dbpassword: DatabasePassword,
   uploadBucket: Bucket,
-  gcpTopicMap: Map<string, gcp.pubsub.Topic>
+  gcpTopicMap: Map<string, gcp.pubsub.Topic>,
+  subscriptionsMap: Map<string, gcp.pubsub.Subscription>
 ) {
   const cloudRunServiceAccount = new gcp.serviceaccount.Account(`${config.tenantId}-cloud-run`, {
     accountId: `${config.tenantId}-cloud-run`,
@@ -72,15 +73,28 @@ export function createIamBindings(
     member: cloudRunServiceAccountEmail,
   });
 
-  const memberBinding = '-iam-member-binding';
+  const memberBinding = 'iam-member-binding';
   [...gcpTopicMap].map(
     ([topicName, topic]) =>
-      new gcp.pubsub.TopicIAMMember(topicName.concat(memberBinding), {
+      new gcp.pubsub.TopicIAMMember(`${topicName}-${memberBinding}`, {
         project: config.projectId,
         topic: topic.name,
-        role: pubsubRoles.publisher,
+        role: 'roles/pubsub.admin',
         member: cloudRunServiceAccountEmail,
       })
+  );
+
+  [...subscriptionsMap].map(
+    ([subscriptionName, subscription]) =>
+      new gcp.pubsub.SubscriptionIAMMember(
+        `${config.tenantId}-${subscriptionName}-${memberBinding}`,
+        {
+          project: config.projectId,
+          subscription: subscription.name,
+          role: 'roles/pubsub.admin',
+          member: cloudRunServiceAccountEmail,
+        }
+      )
   );
 
   return cloudRunServiceAccount.email;

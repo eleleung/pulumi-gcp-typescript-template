@@ -23,8 +23,6 @@ export function createTopics(tenantConfig: Config) {
   return createGCPTopic(createTopicDefinition(tenantConfig));
 }
 
-export const topicAppender = (topicName: string): string => '-'.concat(topicName);
-
 export const topics = {
   firstTopic: 'first-topic',
   secondTopic: 'second-topic',
@@ -33,15 +31,15 @@ export const topics = {
 
 const createTopicDefinition = (tenantConfig: Config): Array<TopicDefinition> => {
   const firstTopic = {
-    name: tenantConfig.tenantId.concat(topicAppender(topics.firstTopic)),
+    name: `${tenantConfig.tenantId}-${topics.firstTopic}`,
     configuration: configuration,
   };
   const secondTopic = {
-    name: tenantConfig.tenantId.concat(topicAppender(topics.secondTopic)),
+    name: `${tenantConfig.tenantId}-${topics.secondTopic}`,
     configuration: configuration,
   };
   const thirdTopic = {
-    name: tenantConfig.tenantId.concat(topicAppender(topics.thirdTopic)),
+    name: `${tenantConfig.tenantId}-${topics.thirdTopic}`,
     configuration: configuration,
   };
   return [firstTopic, secondTopic, thirdTopic];
