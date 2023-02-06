@@ -1,9 +1,8 @@
 import * as gcp from '@pulumi/gcp';
-import { SubnetworkIAMBinding } from '@pulumi/gcp/compute';
 import * as pulumi from '@pulumi/pulumi';
 
 import { Config } from '..';
-import { gcpTopicMap, topicAppender, topics } from './topics';
+import { topicAppender, topics } from './topics';
 
 interface subscriptions {
   names: string[];
@@ -22,7 +21,10 @@ export const subscriptionsMap = new Map<string, subscriptions>([
   [topics.secondTopic, topic2Subscriptions],
 ]);
 
-export function createSubscriptions(tenantConfig: Config) {
+export function createSubscriptions(
+  tenantConfig: Config,
+  gcpTopicMap: Map<string, gcp.pubsub.Topic>
+) {
   subscriptionsMap.forEach((subscriptions, topic) => {
     const selectedTopic = gcpTopicMap.get(
       tenantConfig.tenantId.concat(topicAppender(topics.firstTopic))
