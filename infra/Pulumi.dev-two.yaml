@@ -1,3 +1,4 @@
 config:
   gcp:project: claimer-dev-two
   gcp:region: europe-west2
+  project-number: 518350264333

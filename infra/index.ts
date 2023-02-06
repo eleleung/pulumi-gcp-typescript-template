@@ -3,13 +3,15 @@ import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
 import { Output } from '@pulumi/pulumi';
 
+import { createIamBindings } from './cloud-run-iam';
 import { deployCloudRun } from './cloudrun';
 import { CloudSqlResources, createCloudSqlResources, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
-import { createIamBindings } from './iam';
+import { addProjectServiceAgentRolesToDevops } from './iam';
 import { createSubscriptions } from './pubsub/subscriptions';
 import { createTopics } from './pubsub/topics';
 import { createDbSecret } from './secrets';
+import { devopsProjectId, devopsProjectNumber } from './variables';
 
 export interface Config {
   projectId: string;
@@ -25,13 +27,11 @@ export interface TenantResources {
 }
 
 const gcpConfig = new pulumi.Config('gcp');
-const projectId = gcpConfig.require('project');
 const region: string = gcpConfig.require('region');
+const projectId = gcpConfig.require('project');
 
 const config = new pulumi.Config();
-export const imageTag = config.get('tag') || 'latest';
-
-const cloudSqlResources = createCloudSqlResources(region);
+const imageTag = config.get('tag') || 'latest';
 
 function createTenant(tenantConfig: Config, cloudSqlResources: CloudSqlResources): TenantResources {
   const dbPassword = createDbSecret(tenantConfig);
@@ -62,6 +62,11 @@ function createTenant(tenantConfig: Config, cloudSqlResources: CloudSqlResources
   };
 }
 
+// Create IAM
+addProjectServiceAgentRolesToDevops(devopsProjectNumber, devopsProjectId);
+
+// Create resources
+const cloudSqlResources = createCloudSqlResources(region);
 const claimer = createTenant(
   {
     projectId: projectId,
