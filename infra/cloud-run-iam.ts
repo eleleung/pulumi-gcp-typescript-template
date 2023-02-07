@@ -45,7 +45,6 @@ export function createIamBindings(
     }
   );
 
-  // cloud run service needs to be associated with the cloudRunServiceAccount
   new gcp.projects.IAMMember(
     `${config.tenantId}-cloud-run-cloud-sql`,
     {
