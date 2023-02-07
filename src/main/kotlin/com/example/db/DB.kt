@@ -15,7 +15,6 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.Instant
-import javax.sql.DataSource
 
 
 object ConnectorConnectionPoolFactory {
@@ -29,16 +28,6 @@ object ConnectorConnectionPoolFactory {
         config.username = "admin" // e.g. "root", "postgres"
         config.password = "password" // e.g. "my-password"
 
-
-        // The ipTypes argument can be used to specify a comma delimited list of preferred IP types
-        // for connecting to a Cloud SQL instance. The argument ipTypes=PRIVATE will force the
-        // SocketFactory to connect with an instance's associated private IP.
-        config.addDataSourceProperty("ipTypes", "PUBLIC,PRIVATE")
-
-        // ... Specify additional connection properties here.
-        // ...
-
-        // Initialize the connection pool using the configuration object.
         return HikariDataSource(config)
     }
 
@@ -58,7 +47,7 @@ object ConnectorConnectionPoolFactory {
         )
 }
 
-public fun postgresTypeMappings(): JdbcTypeMappings {
+fun postgresTypeMappings(): JdbcTypeMappings {
     val result = JdbcTypeMappings()
 
     result.register(
