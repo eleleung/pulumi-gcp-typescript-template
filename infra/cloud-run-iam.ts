@@ -78,7 +78,7 @@ export function createIamBindings(
       new gcp.pubsub.TopicIAMMember(`${topicName}-${memberBinding}`, {
         project: config.projectId,
         topic: topic.name,
-        role: 'roles/pubsub.admin',
+        role: 'roles/pubsub.publisher',
         member: cloudRunServiceAccountEmail,
       })
   );
@@ -90,7 +90,7 @@ export function createIamBindings(
         {
           project: config.projectId,
           subscription: subscription.name,
-          role: 'roles/pubsub.admin',
+          role: 'roles/pubsub.subscriber',
           member: cloudRunServiceAccountEmail,
         }
       )
