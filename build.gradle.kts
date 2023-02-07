@@ -35,6 +35,12 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("org.postgresql:postgresql:${properties["postgresVersion"]}")
+    implementation("io.koalaql:koala-core:${properties["koalaVersion"]}")
+    implementation("io.koalaql:koala-jdbc:${properties["koalaVersion"]}")
+    implementation("io.koalaql:koala-postgres:${properties["koalaVersion"]}")
+    implementation("io.koalaql:koala-h2:${properties["koalaVersion"]}")
+    implementation("com.zaxxer:HikariCP:${properties["hikariVersion"]}")
 }
 
 configure<JibExtension> {
