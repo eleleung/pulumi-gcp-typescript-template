@@ -34,21 +34,25 @@ export function createSubscriptions(
       subscriptions.names.forEach(subscription => {
         subscriptionNamesMap.set(
           subscription,
-          new gcp.pubsub.Subscription(`${tenantConfig.tenantId}-${topic}-${subscription}`, {
-            topic: selectedTopic.name,
-            enableMessageOrdering: true,
-            ackDeadlineSeconds: 20,
-            retryPolicy: {
-              minimumBackoff: pulumi.interpolate`10s`,
-              maximumBackoff: pulumi.interpolate`60s`,
-            },
-            pushConfig: {
-              pushEndpoint: 'https://example.com/push', //configure to use tenant application endpoint
-              attributes: {
-                'x-goog-version': 'v1',
+          new gcp.pubsub.Subscription(
+            `${tenantConfig.tenantId}-${topic}-${subscription}`,
+            {
+              topic: selectedTopic.name,
+              enableMessageOrdering: true,
+              ackDeadlineSeconds: 20,
+              retryPolicy: {
+                minimumBackoff: pulumi.interpolate`10s`,
+                maximumBackoff: pulumi.interpolate`60s`,
+              },
+              pushConfig: {
+                pushEndpoint: 'https://example.com/push', //configure to use tenant application endpoint
+                attributes: {
+                  'x-goog-version': 'v1',
+                },
               },
             },
-          })
+            { parent: selectedTopic }
+          )
         );
       });
     }

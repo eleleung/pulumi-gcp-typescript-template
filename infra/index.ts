@@ -1,7 +1,7 @@
 import { Service } from '@pulumi/gcp/cloudrun';
+import { Account } from '@pulumi/gcp/serviceaccount';
 import { Bucket } from '@pulumi/gcp/storage';
 import * as pulumi from '@pulumi/pulumi';
-import { Output } from '@pulumi/pulumi';
 
 import { createIamBindings } from './cloud-run-iam';
 import { deployCloudRun } from './cloudrun';
@@ -19,7 +19,7 @@ export interface Config {
 
 export interface TenantResources {
   cloudRunService: Service;
-  cloudRunServiceAccount: Output<string>;
+  cloudRunServiceAccount: Account;
   cloudSqlResources: CloudSqlResources;
   uploadBucket: Bucket;
 }
@@ -72,6 +72,6 @@ const claimer = createTenant(
 );
 
 export const claimerCloudRunServiceId = claimer.cloudRunService.id;
-export const claimerCloudRunServiceAccountEmail = claimer.cloudRunServiceAccount;
+export const claimerCloudRunServiceAccountEmail = claimer.cloudRunServiceAccount.email;
 export const claimerSqlInstanceId = claimer.cloudSqlResources.sqlInstance.id;
 export const claimerUploadBucketId = claimer.uploadBucket.id;

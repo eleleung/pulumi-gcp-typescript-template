@@ -70,10 +70,14 @@ export function createDatabaseResources(
   sqlInstance: DatabaseInstance,
   dbPassword: DatabasePassword
 ) {
-  const database = new gcp.sql.Database(`${config.tenantId}-database`, {
-    name: `${config.tenantId}-database`,
-    instance: sqlInstance.name,
-  });
+  const database = new gcp.sql.Database(
+    `${config.tenantId}-database`,
+    {
+      name: `${config.tenantId}-database`,
+      instance: sqlInstance.name,
+    },
+    { dependsOn: [sqlInstance] }
+  );
 
   new gcp.sql.User(
     `${config.tenantId}-db-user`,
