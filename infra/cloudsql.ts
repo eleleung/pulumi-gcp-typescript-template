@@ -33,7 +33,6 @@ export function createCloudSqlResources(region: string): CloudSqlResources {
     }
   );
 
-  // cloud run service needs to be associated with this vpc connector for db access
   const vpcConnector = new gcp.vpcaccess.Connector(
     'connector',
     {

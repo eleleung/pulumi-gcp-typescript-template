@@ -21,15 +21,17 @@ steps:
     env:
       # We use substitution for an example. Your Pulumi access token is sensitive and as such should be encrypted.
       # See the Encrypted Variables section below on how to do that.
-      - 'PULUMI_ACCESS_TOKEN=$_INSECURE_SUBSTITUTION_PULUMI_ACCESS_TOKEN'
       - 'BUILD_TYPE=$_BUILD_TYPE'
       - 'PULUMI_STACK=$_PULUMI_STACK'
       - 'BRANCH_NAME=$BRANCH_NAME'
       - 'SHORT_SHA=$SHORT_SHA'
+    secretEnv: [ 'PULUMI_ACCESS_TOKEN' ]
 availableSecrets:
   secretManager:
     - versionName: 'projects/785020424916/secrets/gradle-cache-pass/versions/2'
       env: 'CACHE_PASS'
+    - versionName: 'projects/785020424916/secrets/pulumi-access-token/versions/1'
+      env: 'PULUMI_ACCESS_TOKEN'
 options:
   pool:
     name: 'projects/785020424916/locations/europe-west2/workerPools/pool-1'
