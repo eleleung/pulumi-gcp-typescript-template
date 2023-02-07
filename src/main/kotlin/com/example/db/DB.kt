@@ -23,7 +23,7 @@ object ConnectorConnectionPoolFactory {
         val config = HikariConfig()
 
         // Configure which instance and what database user to connect with.
-        config.jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", "10.62.0.3", "5432", "claimer-database")
+        config.jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", "10.92.0.5", "5432", "claimer-database")
         config.username = "admin" // e.g. "root", "postgres"
         config.password = "password" // e.g. "my-password"
 
