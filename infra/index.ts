@@ -7,11 +7,9 @@ import { createIamBindings } from './cloud-run-iam';
 import { deployCloudRun } from './cloudrun';
 import { CloudSqlResources, createCloudSqlResources, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
-import { addProjectComputeServiceAccountRoles } from './iam';
 import { createSubscriptions } from './pubsub/subscriptions';
 import { createTopics } from './pubsub/topics';
 import { createDbSecret } from './secrets';
-import { devopsProjectId, devopsProjectNumber } from './variables';
 
 export interface Config {
   projectId: string;
