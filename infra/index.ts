@@ -7,6 +7,7 @@ import { createIamBindings } from './cloud-run-iam';
 import { deployCloudRun } from './cloudrun';
 import { CloudSqlResources, createCloudSqlResources, createDatabaseResources } from './cloudsql';
 import { uploads } from './gcs';
+import { createPubsubIamRoles } from './pubsub/pubsub-iam';
 import { createSubscriptions } from './pubsub/subscriptions';
 import { createTopics } from './pubsub/topics';
 import { createDbSecret } from './secrets';
@@ -35,22 +36,18 @@ function createTenant(tenantConfig: Config, cloudSqlResources: CloudSqlResources
   const dbPassword = createDbSecret(tenantConfig);
   const uploadBucket = uploads(tenantConfig);
   const topics = createTopics(tenantConfig);
-  const subscriptions = createSubscriptions(tenantConfig, topics);
-  const cloudRunServiceAccount = createIamBindings(
-    tenantConfig,
-    dbPassword,
-    uploadBucket,
-    topics,
-    subscriptions
-  );
-  createDatabaseResources(tenantConfig, cloudSqlResources.sqlInstance, dbPassword);
-
+  const cloudRunServiceAccount = createIamBindings(tenantConfig, dbPassword, uploadBucket);
+  const cloudRunServiceAccountEmail = pulumi.interpolate`serviceAccount:${cloudRunServiceAccount.email}`;
   const cloudRunService = deployCloudRun(
     tenantConfig,
     cloudRunServiceAccount,
     imageTag,
     cloudSqlResources
   );
+  const subscriptions = createSubscriptions(tenantConfig, topics, cloudRunService);
+
+  createDatabaseResources(tenantConfig, cloudSqlResources.sqlInstance, dbPassword);
+  createPubsubIamRoles(tenantConfig, cloudRunServiceAccountEmail, topics, subscriptions);
 
   return {
     cloudRunService,
@@ -73,6 +70,6 @@ const claimer = createTenant(
 
 export const claimerCloudRunServiceId = claimer.cloudRunService.id;
 export const claimerCloudRunServiceAccountEmail = claimer.cloudRunServiceAccount.email;
-export const claimerCloudRunServiceStatus = claimer.cloudRunService.statuses;
+export const claimerCloudRunServiceUrl = claimer.cloudRunService.statuses[0]?.url;
 export const claimerSqlInstanceId = claimer.cloudSqlResources.sqlInstance.id;
 export const claimerUploadBucketId = claimer.uploadBucket.id;

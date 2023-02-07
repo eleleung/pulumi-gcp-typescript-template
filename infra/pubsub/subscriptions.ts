@@ -24,10 +24,12 @@ export const subscriptionsMap = new Map<string, subscriptions>([
 
 export function createSubscriptions(
   tenantConfig: Config,
-  gcpTopicMap: Map<string, gcp.pubsub.Topic>
-  // cloudRunService: Service
+  gcpTopicMap: Map<string, gcp.pubsub.Topic>,
+  cloudRunService: Service
 ) {
+  const cloudRunUrl = pulumi.interpolate`${cloudRunService.statuses[0]?.url}/pubsub`;
   const subscriptionNamesMap = new Map<string, gcp.pubsub.Subscription>();
+
   subscriptionsMap.forEach((subscriptions, topic) => {
     const selectedTopic = gcpTopicMap.get(`${tenantConfig.tenantId}-${topic}`);
     if (typeof selectedTopic === 'undefined') {
@@ -47,7 +49,8 @@ export function createSubscriptions(
                 maximumBackoff: pulumi.interpolate`60s`,
               },
               pushConfig: {
-                pushEndpoint: 'https://example.com/push',
+                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                pushEndpoint: cloudRunUrl,
                 attributes: {
                   'x-goog-version': 'v1',
                 },

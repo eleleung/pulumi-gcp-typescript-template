@@ -9,9 +9,7 @@ import { DatabasePassword } from './secrets';
 export function createIamBindings(
   config: Config,
   dbpassword: DatabasePassword,
-  uploadBucket: Bucket,
-  gcpTopicMap: Map<string, gcp.pubsub.Topic>,
-  subscriptionsMap: Map<string, gcp.pubsub.Subscription>
+  uploadBucket: Bucket
 ) {
   const cloudRunServiceAccount = new gcp.serviceaccount.Account(`${config.tenantId}-cloud-run`, {
     accountId: `${config.tenantId}-cloud-run`,
@@ -70,30 +68,6 @@ export function createIamBindings(
     role: 'roles/secretmanager.secretAccessor',
     member: cloudRunServiceAccountEmail,
   });
-
-  const memberBinding = 'iam-member-binding';
-  [...gcpTopicMap].map(
-    ([topicName, topic]) =>
-      new gcp.pubsub.TopicIAMMember(`${topicName}-${memberBinding}`, {
-        project: config.projectId,
-        topic: topic.name,
-        role: 'roles/pubsub.publisher',
-        member: cloudRunServiceAccountEmail,
-      })
-  );
-
-  [...subscriptionsMap].map(
-    ([subscriptionName, subscription]) =>
-      new gcp.pubsub.SubscriptionIAMMember(
-        `${config.tenantId}-${subscriptionName}-${memberBinding}`,
-        {
-          project: config.projectId,
-          subscription: subscription.name,
-          role: 'roles/pubsub.subscriber',
-          member: cloudRunServiceAccountEmail,
-        }
-      )
-  );
 
   return cloudRunServiceAccount;
 }
