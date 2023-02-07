@@ -1,4 +1,5 @@
 import * as gcp from '@pulumi/gcp';
+import { Service } from '@pulumi/gcp/cloudrun';
 import * as pulumi from '@pulumi/pulumi';
 
 import { Config } from '..';
@@ -24,6 +25,7 @@ export const subscriptionsMap = new Map<string, subscriptions>([
 export function createSubscriptions(
   tenantConfig: Config,
   gcpTopicMap: Map<string, gcp.pubsub.Topic>
+  // cloudRunService: Service
 ) {
   const subscriptionNamesMap = new Map<string, gcp.pubsub.Subscription>();
   subscriptionsMap.forEach((subscriptions, topic) => {
@@ -45,7 +47,7 @@ export function createSubscriptions(
                 maximumBackoff: pulumi.interpolate`60s`,
               },
               pushConfig: {
-                pushEndpoint: 'https://example.com/push', //configure to use tenant application endpoint
+                pushEndpoint: 'https://example.com/push',
                 attributes: {
                   'x-goog-version': 'v1',
                 },

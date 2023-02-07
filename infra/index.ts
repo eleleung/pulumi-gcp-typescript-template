@@ -73,5 +73,6 @@ const claimer = createTenant(
 
 export const claimerCloudRunServiceId = claimer.cloudRunService.id;
 export const claimerCloudRunServiceAccountEmail = claimer.cloudRunServiceAccount.email;
+export const claimerCloudRunServiceStatus = claimer.cloudRunService.statuses;
 export const claimerSqlInstanceId = claimer.cloudSqlResources.sqlInstance.id;
 export const claimerUploadBucketId = claimer.uploadBucket.id;
